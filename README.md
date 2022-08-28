@@ -36,4 +36,4 @@ Name of feature: Map image and zoom buttons
 Estimate of time needed to complete:2 hours
 
 
-Actual time needed to complete:2.5 Hours
+Actual time needed to complete:2.5 Hours.
