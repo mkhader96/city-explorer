@@ -14,7 +14,8 @@ class App extends React.Component {
       mapImg: false,
       zoom: 18,
     };
-  }
+  };
+   
 
   getLocationData = async (event) => {
     event.preventDefault();
@@ -38,6 +39,28 @@ class App extends React.Component {
       });
     }
   };
+  getWeatherData = async (e) => {
+
+    e.preventDefault();
+    const lati = this.resResult.data[0].lat;
+    const city = e.target.elements.city.value;
+    const weatherURL = `http://localhost:3000/weather?name=${city}&lat=${lati}&lon=${this.state.lon}`;
+    try {
+      let resWeather = await axios.get(weatherURL);
+      console.log(resWeather.data);
+      this.setState({
+        dname: this.resResult.data.name,
+        lat: this.resResult.data[0].lat,
+        lon: this.resResult.data[0].lon,
+        
+      });
+    } catch {
+      this.setState({
+        
+      });
+    }
+    
+  }
   zoomIn = () => {
     if (this.state.zoom < 18) {
       this.setState({
@@ -59,20 +82,18 @@ class App extends React.Component {
         <br></br>
         <br></br>
 
-        <form onSubmit={this.getLocationData}>
+        <form onSubmit={this.getLocationData} onSubmit={this.getWeatherData}>
           <input type="text" name="city" placeholder="Enter a city" />
           <button type="submit">Explore!</button>
         </form>
-        <br></br>
-        <br></br>
-        <br></br>
+       
 
-        <link
+        {/* <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
           crossorigin="anonymous"
-        />
+        /> */}
         <Card style={{ width: "40rem" }}>
           {this.state.mapImg && (
             <Card.Img
