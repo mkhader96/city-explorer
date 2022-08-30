@@ -2,17 +2,20 @@ import React from "react";
 import axios from "axios";
 import Card from "react-bootstrap/Card";
 import ListGroup from "react-bootstrap/ListGroup";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      dname: "",
+      cityName: "",
       lat: "",
       lon: "",
+      zoom: 18,
       errorMsg: false,
       mapImg: false,
-      zoom: 18,
+      movies: [],
       weather: [],
     };
   }
@@ -25,7 +28,7 @@ class App extends React.Component {
     try {
       let resResult = await axios.get(URL);
       this.setState({
-        dname: resResult.data[0].display_name,
+        cityName: resResult.data[0].display_name,
         lat: resResult.data[0].lat,
         lon: resResult.data[0].lon,
         mapImg: true,
@@ -33,6 +36,7 @@ class App extends React.Component {
       });
 
       this.getWeatherData(resResult.data[0].lat, resResult.data[0].lon);
+      this.getMoviesData(event.target.city.value);
     } catch {
       this.setState({
         errorMsg: true,
@@ -41,10 +45,12 @@ class App extends React.Component {
   };
   getWeatherData = async (lat, lon) => {
     try {
-      let resResult = await axios.get(`${process.env.REACT_APP_SERVER}/weather?lat=${lat}&lon=${lon}`);
-      console.log(resResult);
+      let resResult = await axios.get(
+        `${process.env.REACT_APP_SERVER}/weather?lat=${lat}&lon=${lon}`
+      );
       this.setState({
         weather: resResult.data,
+        errorMsg: false,
       });
     } catch {
       this.setState({
@@ -63,6 +69,25 @@ class App extends React.Component {
     if (this.state.zoom > 0) {
       this.setState({
         zoom: this.state.zoom - 1,
+      });
+    }
+  };
+  getMoviesData = async (cityName) => {
+    try {
+      let city = cityName;
+      console.log(city);
+      let resResult = await axios.get(
+        `${process.env.REACT_APP_SERVER}/movies?city=${city}`
+      );
+      console.log(resResult.data);
+      this.setState({
+        movies: resResult.data,
+        errorMsg: false,
+      });
+      console.log(this.state.movies);
+    } catch {
+      this.setState({
+        errorMsg: true,
       });
     }
   };
@@ -92,7 +117,15 @@ class App extends React.Component {
             />
           )}
           <Card.Body>
-            <Card.Title>Name {this.state.dname}</Card.Title>
+            {this.state.mapImg && (
+              <button onClick={this.zoomIn}>Zoom In</button>
+            )}
+            <span> </span>
+
+            {this.state.mapImg && (
+              <button onClick={this.zoomOut}>Zoom Out</button>
+            )}
+            <Card.Title>Name {this.state.cityName}</Card.Title>
           </Card.Body>
           <ListGroup className="list-group-flush">
             <ListGroup.Item>Latitude: {this.state.lat}</ListGroup.Item>
@@ -103,25 +136,48 @@ class App extends React.Component {
                   <span>Date: {day.date}</span>
                   <br></br>
                   <span>{day.description}</span>
-                  </ListGroup.Item>
+                </ListGroup.Item>
               ))}
             </div>
           </ListGroup>
 
           <Card.Body>
-            {this.state.mapImg && (
-              <button onClick={this.zoomIn}>Zoom In</button>
-            )}
-            <span> </span>
-
-            {this.state.mapImg && (
-              <button onClick={this.zoomOut}>Zoom Out</button>
-            )}
             {this.state.errorMsg && (
               <h4>Error : sorry something went wrong!</h4>
             )}
-          </Card.Body>
-        </Card>
+            </Card.Body></Card>
+            <Row xs={1} md={4} className="g-4">
+              {this.state.movies.map((movie) => (
+                <div>
+
+                <Col>
+                  <Card style={{ width: "18rem" }}>
+                    <Card.Img variant="top" src={movie.image_url} />
+                    <Card.Body>
+                      <Card.Title>Movie Name: {movie.title}</Card.Title>
+                      <Card.Text>Overview: {movie.overview}</Card.Text>
+                    </Card.Body>
+                    <ListGroup className="list-group-flush">
+                      <ListGroup.Item>
+                        Average Votes: {movie.average_votes}
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        Total Votes: {movie.total_votes}
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        Popularity: {movie.popularity}
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        Release Date: {movie.released_on}
+                      </ListGroup.Item>
+                    </ListGroup>
+                  </Card>
+                </Col>
+                </div>
+              ))}
+            </Row>
+          
+        
       </div>
     );
   }
