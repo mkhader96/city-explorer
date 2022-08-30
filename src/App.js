@@ -13,15 +13,14 @@ class App extends React.Component {
       errorMsg: false,
       mapImg: false,
       zoom: 18,
+      weather: [],
     };
-  };
-   
+  }
 
   getLocationData = async (event) => {
     event.preventDefault();
     const cityName = event.target.city.value;
-    const key = "pk.8f6f74f05371d52160397d85b766283a";
-    const URL = `https://us1.locationiq.com/v1/search?key=${key}&q=${cityName}&format=json`;
+    const URL = `https://us1.locationiq.com/v1/search?key=${process.env.REACT_APP_MAP_KEY}&q=${cityName}&format=json`;
 
     try {
       let resResult = await axios.get(URL);
@@ -32,35 +31,27 @@ class App extends React.Component {
         mapImg: true,
         errorMsg: false,
       });
+
+      this.getWeatherData(resResult.data[0].lat, resResult.data[0].lon);
     } catch {
-      console.log("err");
       this.setState({
         errorMsg: true,
       });
     }
   };
-  getWeatherData = async (e) => {
-
-    e.preventDefault();
-    const lati = this.resResult.data[0].lat;
-    const city = e.target.elements.city.value;
-    const weatherURL = `http://localhost:3000/weather?name=${city}&lat=${lati}&lon=${this.state.lon}`;
+  getWeatherData = async (lat, lon) => {
     try {
-      let resWeather = await axios.get(weatherURL);
-      console.log(resWeather.data);
+      let resResult = await axios.get(`${process.env.REACT_APP_SERVER}/weather?lat=${lat}&lon=${lon}`);
+      console.log(resResult);
       this.setState({
-        dname: this.resResult.data.name,
-        lat: this.resResult.data[0].lat,
-        lon: this.resResult.data[0].lon,
-        
+        weather: resResult.data,
       });
     } catch {
       this.setState({
-        
+        errorMsg: true,
       });
     }
-    
-  }
+  };
   zoomIn = () => {
     if (this.state.zoom < 18) {
       this.setState({
@@ -82,18 +73,17 @@ class App extends React.Component {
         <br></br>
         <br></br>
 
-        <form onSubmit={this.getLocationData} onSubmit={this.getWeatherData}>
+        <form onSubmit={this.getLocationData}>
           <input type="text" name="city" placeholder="Enter a city" />
           <button type="submit">Explore!</button>
         </form>
-       
 
-        {/* <link
+        <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
           crossorigin="anonymous"
-        /> */}
+        />
         <Card style={{ width: "40rem" }}>
           {this.state.mapImg && (
             <Card.Img
@@ -107,7 +97,17 @@ class App extends React.Component {
           <ListGroup className="list-group-flush">
             <ListGroup.Item>Latitude: {this.state.lat}</ListGroup.Item>
             <ListGroup.Item>Longitude: {this.state.lon}</ListGroup.Item>
+            <div>
+              {this.state.weather.map((day) => (
+                <ListGroup.Item>
+                  <span>Date: {day.date}</span>
+                  <br></br>
+                  <span>{day.description}</span>
+                  </ListGroup.Item>
+              ))}
+            </div>
           </ListGroup>
+
           <Card.Body>
             {this.state.mapImg && (
               <button onClick={this.zoomIn}>Zoom In</button>
