@@ -1,0 +1,12 @@
+tr,td,th,table{
+    border: 3px solid rgb(11, 23, 192);
+  }
+card {
+    background-color: rgb(95, 182, 204);
+    border: solid 5px rgb(158, 210, 231);
+    text-shadow: 4px 4px 2px rgba(0,0,0,0.6);
+    box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.75);
+    margin-bottom: 30px;
+  }
